@@ -1,0 +1,2 @@
+# uther
+Uther Discord Bot
