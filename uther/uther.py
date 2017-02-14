@@ -1,8 +1,11 @@
 import discord
 import asyncio
 from random import randint
+import os
 
+token = os.getenv('DISCORD_TOKEN')
 client = discord.Client()
+
 
 @client.event
 async def on_ready():
@@ -10,6 +13,7 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
+
 
 @client.event
 async def on_message(message):
@@ -44,4 +48,4 @@ def roll(message):
     
     return result
 
-client.run('TOKEN')
+client.run(token)
