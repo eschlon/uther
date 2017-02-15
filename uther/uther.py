@@ -24,24 +24,59 @@ async def on_message(message):
     elif message.content.startswith('!sleep'):
         await asyncio.sleep(5)
         await client.send_message(message.channel, 'Done sleeping')
-    elif message.content.startswith('!roll'):
-        result = roll(message.content)
-        await client.send_message(message.channel, result)
+    elif message.content.startswith('/rf'):
+        result = fluid(message.content)
+        await client.send_message(message.channel, success_text)
 
-
-def roll(message):
-    """!roll 2d10
-        <number>d<sides> [+-/*] <number>d<sides> / <constant>
-        5d10k2 - Keep Highest 2
-        5d10l2 - Keep Lowest 2
-        5d10x9 - Explode rolls that are 9 or higher
+def fluid(message):
+    """Example: /rf d7 t6 p6
+    Syntax: /rf d<n1> t<n2> p<n3>, where
+    n1 = number of dice rolled
+    n2 = threshold: the minimum number to be considered a success
+    n3 = bonus pips: can be added across all failed rolls, if this will create additional successes
     """
-    dice = message.split(' ')[1].split('d')
-    n, sides = [int(d) for d in dice]
+    dice = message.split('d')[1].split(' ')[0]
+    dice = int(dice)
+    threshold = message.split('t')[1].split(' ')[0]
+    threshold = int(threshold)
+    pips = message.split('p')[1].split(' ')[0]
+    pips = int(pips)
     result = []
-    for _ in range(n):
-        result.append(randint(1, sides))
-    
-    return result
+    for _ in range(dice):
+        result.append(randint(1, 10))
+
+    result.sort(reverse = True)
+
+    success_count = 0
+
+    NatSuccess = []
+    PipSuccess = []
+    Failures =[]
+
+    for r in result:
+        margin = r - threshold
+        if margin >= 0:
+            success_count += 1
+            NatSuccess.append(r)
+        elif pips + margin >= 0:
+            pips += margin
+            PipSuccess.append(r)
+            success_count += 1
+        else:
+            Failures.append(r)
+
+    TotalDice = NatSuccess + PipSuccess + Failures
+
+    if success_count != 1 and pips != 1:
+        success_text = '{} successes with {} pips remaining:\n{}'.format(success_count, pips, TotalDice)
+    elif success_count == 1 and pips != 1:
+        success_text = '1 success with {} pips remaining:\n{}'.format(pips, TotalDice)
+    elif success_count != 1 and pips == 1:
+        success_text = '{} successes with 1 pip remaining:\n{}'.format(success_count, TotalDice)
+    else:
+        success_text = '1 successes with 1 pip remaining:\n{}'.format(TotalDice)
+
+    return success_text
+
 
 client.run('TOKEN')
