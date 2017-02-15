@@ -2,6 +2,7 @@ import discord
 import asyncio
 from random import randint
 
+token = os.getenv('DISCORD_TOKEN')
 client = discord.Client()
 
 @client.event
@@ -79,4 +80,4 @@ def fluid(message):
     return success_text
 
 
-client.run('TOKEN')
+client.run(token)
